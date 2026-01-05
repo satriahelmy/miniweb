@@ -64,16 +64,39 @@ class FileController extends Controller
             ],
         ]);
 
+        $uploadedFile = $request->file('file');
+        $validationErrors = [];
+        $mimeType = null;
+
+        // Collect all validation errors
         if ($validator->fails()) {
-            return back()->withErrors($validator)->withInput();
+            $validationErrors = array_merge($validationErrors, $validator->errors()->all());
         }
 
-        $uploadedFile = $request->file('file');
+        // DoS Protection: Explicit file size validation in bytes
+        if ($uploadedFile) {
+            $maxSizeInBytes = self::MAX_FILE_SIZE * 1024;
+            $fileSize = $uploadedFile->getSize();
+            
+            if ($fileSize > $maxSizeInBytes) {
+                $validationErrors[] = 'File size exceeds the maximum allowed size of ' . self::MAX_FILE_SIZE . ' KB.';
+            }
 
-        // File sanitization: validate MIME type
-        $mimeType = $uploadedFile->getMimeType();
-        if (!in_array($mimeType, self::ALLOWED_MIME_TYPES)) {
-            return back()->withErrors(['file' => 'File type not allowed.'])->withInput();
+            // Additional DoS protection: Check if file is actually uploaded (not empty)
+            if ($fileSize === 0 || $fileSize === false) {
+                $validationErrors[] = 'Invalid file or file is empty.';
+            }
+
+            // File sanitization: validate MIME type
+            $mimeType = $uploadedFile->getMimeType();
+            if (!in_array($mimeType, self::ALLOWED_MIME_TYPES)) {
+                $validationErrors[] = 'File type not allowed.';
+            }
+        }
+
+        // Return early if there are validation errors
+        if (!empty($validationErrors)) {
+            return back()->withErrors(['file' => $validationErrors[0]])->withInput();
         }
 
         // Sanitize filename: remove dangerous characters and create safe stored name
