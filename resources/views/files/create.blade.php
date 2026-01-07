@@ -45,16 +45,6 @@
         </form>
     </div>
 
-    <div class="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <h3 class="font-semibold text-blue-900 mb-2">Security Features:</h3>
-        <ul class="list-disc list-inside text-blue-800 text-sm space-y-1">
-            <li>File type validation (MIME type checking)</li>
-            <li>File size limit (10 MB maximum)</li>
-            <li>Filename sanitization</li>
-            <li>Secure storage in private directory</li>
-            <li>Access control (only file owner can download)</li>
-        </ul>
-    </div>
 </div>
 @endsection
 
