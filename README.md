@@ -1,4 +1,4 @@
-# Mini Secure Web Application
+# AmanSpace
 
 A secure web application built with Laravel framework that implements essential security features including user authentication, data submission, and secure file management.
 
@@ -250,13 +250,9 @@ miniweb/
 
 ## Default Users (Development Only)
 
-After running the seeder in **development/testing** environment, you can login with these default accounts:
+After running the seeder in **development/testing** environment, you can login with this default account:
 
-1. **Admin Account**
-   - Email: `admin@example.com`
-   - Password: `password123`
-
-2. **Test Account**
+1. **Test Account**
    - Email: `test@example.com`
    - Password: `password123`
 

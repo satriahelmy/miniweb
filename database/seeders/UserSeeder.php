@@ -16,26 +16,14 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        // Only create default users in development/testing environments
-        // NEVER create default users in production!
+        // Only create a non-admin test user in development/testing environments
+        // NEVER create default admin users in any environment!
         if (app()->environment(['local', 'testing', 'development'])) {
-            // Create default admin user (only if doesn't exist)
-            User::updateOrCreate(
-                ['email' => 'admin@example.com'],
-                [
-                    'name' => 'Admin',
-                    'password' => Hash::make('password123'), // Password: password123
-                    'role' => 'admin',
-                    'is_active' => true,
-                ]
-            );
-
-            // Create test user (only if doesn't exist)
             User::updateOrCreate(
                 ['email' => 'test@example.com'],
                 [
                     'name' => 'Test User',
-                    'password' => Hash::make('password123'), // Password: password123
+                    'password' => Hash::make('password123'), // Password: password123 (DEV ONLY)
                     'role' => 'user',
                     'is_active' => true,
                 ]

@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Mini Secure Web Application')</title>
+    <title>@yield('title', 'AmanSpace')</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="bg-gray-50 min-h-screen">
@@ -13,7 +13,7 @@
             <div class="flex justify-between h-16">
                 <div class="flex items-center">
                     <a href="{{ route('dashboard') }}" class="text-xl font-bold text-gray-900">
-                        Mini Secure Web App
+                        AmanSpace
                     </a>
                 </div>
                 <div class="flex items-center space-x-4">

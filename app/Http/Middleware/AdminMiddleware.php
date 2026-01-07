@@ -17,12 +17,16 @@ class AdminMiddleware
     {
         // Check if user is authenticated
         if (!auth()->check()) {
-            abort(403, 'Unauthorized. Please login first.');
+            return redirect()
+                ->route('login')
+                ->with('error', 'Please login to access this page.');
         }
 
         // Check if user is admin
         if (auth()->user()->role !== 'admin') {
-            abort(403, 'Unauthorized. Admin access required.');
+            return redirect()
+                ->route('dashboard')
+                ->with('error', 'Unauthorized. Admin access required.');
         }
 
         return $next($request);

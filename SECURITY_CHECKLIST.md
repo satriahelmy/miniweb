@@ -1,4 +1,4 @@
-# Security Checklist - Mini Secure Web Application
+# Security Checklist - AmanSpace
 
 ## ✅ Verifikasi Implementasi Security Requirements
 

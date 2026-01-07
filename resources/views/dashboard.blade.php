@@ -46,16 +46,5 @@
     </div>
 </div>
 
-<div class="bg-white rounded-lg shadow-md p-6">
-    <h2 class="text-xl font-semibold text-gray-900 mb-4">Security Features</h2>
-    <ul class="list-disc list-inside text-gray-600 space-y-2">
-        <li>Password hashing using bcrypt</li>
-        <li>CSRF protection enabled</li>
-        <li>Input validation and sanitization</li>
-        <li>Secure file upload with sanitization</li>
-        <li>Access control for file downloads</li>
-        <li>Secure session management</li>
-    </ul>
-</div>
 @endsection
 
