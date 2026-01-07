@@ -136,13 +136,17 @@ class FileController extends Controller
         if ($file->user_id !== Auth::id()) {
             // Log unauthorized download attempt
             AuditLogService::logUnauthorized('file_download', $file, "User attempted to download file owned by user {$file->user_id}");
-            abort(403, 'Unauthorized access. You can only download your own files.');
+            return redirect()
+                ->route('files.index')
+                ->with('error', 'Unauthorized access. You can only download your own files.');
         }
 
         // Verify file exists
         if (!Storage::disk('private')->exists($file->path)) {
             AuditLogService::logFile('download', $file, 'failed', 'File not found in storage');
-            abort(404, 'File not found.');
+            return redirect()
+                ->route('files.index')
+                ->with('error', 'File not found or is no longer available.');
         }
 
         // Log successful download

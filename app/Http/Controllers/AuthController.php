@@ -49,6 +49,8 @@ class AuthController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password), // Password hashing dengan bcrypt
+            'role' => 'user', // Default role for new users
+            'is_active' => true, // New users are active by default
         ]);
 
         // Auto login after registration
@@ -94,6 +96,18 @@ class AuthController extends Controller
             'email' => ['required', 'email'],
             'password' => ['required'],
         ]);
+
+        // Check if user exists and is active
+        $user = User::where('email', $credentials['email'])->first();
+        
+        if ($user && !$user->is_active) {
+            LoginAttempt::record($ipAddress, $credentials['email'], false);
+            AuditLogService::logAuth('login', 'failed', $credentials['email'], 'Account is disabled');
+            
+            return back()->withErrors([
+                'email' => 'Your account has been disabled. Please contact administrator.',
+            ])->onlyInput('email');
+        }
 
         // Attempt login with secure session
         if (Auth::attempt($credentials, $request->boolean('remember'))) {

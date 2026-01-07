@@ -8,6 +8,16 @@
     <p class="text-gray-600">Welcome to your secure web application dashboard</p>
 </div>
 
+@if(Auth::user()->isAdmin())
+<div class="mb-6 bg-purple-50 border border-purple-200 rounded-lg p-6">
+    <h2 class="text-xl font-semibold text-purple-900 mb-2">Admin Panel</h2>
+    <p class="text-purple-700 mb-4">Manage users, disable accounts, and view system information</p>
+    <a href="{{ route('admin.users.index') }}" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md inline-block">
+        Manage Users
+    </a>
+</div>
+@endif
+
 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
     <div class="bg-white rounded-lg shadow-md p-6">
         <h2 class="text-xl font-semibold text-gray-900 mb-4">Submissions</h2>

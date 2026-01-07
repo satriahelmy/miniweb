@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\FileController;
 use App\Http\Controllers\SubmissionController;
@@ -36,4 +37,11 @@ Route::middleware('auth')->group(function () {
     // Files routes
     Route::resource('files', FileController::class)->except(['show', 'update', 'edit']);
     Route::get('/files/{file}/download', [FileController::class, 'download'])->name('files.download');
+
+    // Admin routes (require admin role)
+    Route::middleware('admin')->prefix('admin')->name('admin.')->group(function () {
+        Route::get('/users', [AdminController::class, 'index'])->name('users.index');
+        Route::delete('/users/{user}', [AdminController::class, 'destroy'])->name('users.destroy');
+        Route::post('/users/{user}/toggle-status', [AdminController::class, 'toggleStatus'])->name('users.toggle-status');
+    });
 });

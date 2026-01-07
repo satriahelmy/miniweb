@@ -18,6 +18,11 @@
                 </div>
                 <div class="flex items-center space-x-4">
                     @auth
+                        @if(Auth::user()->isAdmin())
+                            <a href="{{ route('admin.users.index') }}" class="text-purple-600 hover:text-purple-800 font-medium">
+                                Admin Panel
+                            </a>
+                        @endif
                         <span class="text-gray-700">Hello, {{ Auth::user()->name }}</span>
                         <form method="POST" action="{{ route('logout') }}" class="inline">
                             @csrf
