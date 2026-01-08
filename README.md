@@ -2,7 +2,7 @@
 
 AmanSpace adalah aplikasi web yang aman untuk mengelola data dan file pribadi. Dibangun dengan Laravel framework yang mengimplementasikan berbagai fitur keamanan esensial termasuk autentikasi pengguna, pengiriman data, dan manajemen file yang aman.
 
-## 📋 Daftar Isi
+## Daftar Isi
 
 - [Cara Menjalankan Aplikasi](#cara-menjalankan-aplikasi)
 - [Penjelasan Fitur](#penjelasan-fitur)
@@ -12,7 +12,7 @@ AmanSpace adalah aplikasi web yang aman untuk mengelola data dan file pribadi. D
 
 ---
 
-## 🚀 Cara Menjalankan Aplikasi
+## Cara Menjalankan Aplikasi
 
 ### Mode Development
 
@@ -68,7 +68,7 @@ php artisan user:make-admin user@example.com
 
 ---
 
-## ✨ Penjelasan Fitur
+## Penjelasan Fitur
 
 ### 1. Manajemen User
 
@@ -131,11 +131,11 @@ Fitur admin hanya dapat diakses oleh user dengan role 'admin':
 
 ---
 
-## 🔒 Aspek Keamanan yang Diterapkan
+## Aspek Keamanan yang Diterapkan
 
 ### 1. Password Hashing (bcrypt/argon2)
 
-✅ **Implementasi:**
+**Implementasi:**
 - Menggunakan `Hash::make()` dengan bcrypt (default Laravel)
 - Model User menggunakan cast `'password' => 'hashed'` (auto-hash saat assign)
 - Password tidak pernah disimpan dalam plaintext
@@ -147,7 +147,7 @@ Fitur admin hanya dapat diakses oleh user dengan role 'admin':
 
 ### 2. CSRF Protection
 
-✅ **Implementasi:**
+**Implementasi:**
 - Semua form menggunakan `@csrf` directive
 - CSRF token di meta tag untuk AJAX requests
 - Laravel middleware otomatis memvalidasi CSRF token
@@ -160,7 +160,7 @@ Fitur admin hanya dapat diakses oleh user dengan role 'admin':
 
 ### 3. Input Validation
 
-✅ **Implementasi:**
+**Implementasi:**
 - Server-side validation menggunakan Laravel Validator
 - Validasi untuk semua input (email, password, file, content)
 - Input sanitization menggunakan `strip_tags()` untuk text inputs
@@ -180,7 +180,7 @@ Fitur admin hanya dapat diakses oleh user dengan role 'admin':
 
 ### 4. File Upload Sanitization
 
-✅ **Implementasi:**
+**Implementasi:**
 - MIME type validation (whitelist approach)
 - Filename sanitization (remove dangerous characters)
 - Unique stored filename (prevent conflicts & path traversal)
@@ -205,7 +205,7 @@ Fitur admin hanya dapat diakses oleh user dengan role 'admin':
 
 ### 5. Access Control untuk Download
 
-✅ **Implementasi:**
+**Implementasi:**
 - Authorization check di controller method
 - Query filtering (hanya menampilkan file milik user)
 - Redirect dengan pesan error yang user-friendly (bukan 403 page)
@@ -224,17 +224,17 @@ Fitur admin hanya dapat diakses oleh user dengan role 'admin':
 
 ### 6. Tidak Ada Hardcoded Secrets
 
-✅ **Implementasi:**
+**Implementasi:**
 - Semua secrets menggunakan environment variables (.env)
 - APP_KEY di-generate via `php artisan key:generate`
 - Database credentials di .env
 - Tidak ada password/secret hardcoded di source code
 
 **Verifikasi:**
-- ✅ `.env` file di .gitignore (tidak di-commit)
-- ✅ `.env.example` sebagai template
-- ✅ Semua config menggunakan `env()` helper
-- ✅ Tidak ada hardcoded credentials di code
+- `.env` file di .gitignore (tidak di-commit)
+- `.env.example` sebagai template
+- Semua config menggunakan `env()` helper
+- Tidak ada hardcoded credentials di code
 
 **Lokasi:**
 - `config/app.php`: `env('APP_KEY')`
@@ -243,16 +243,16 @@ Fitur admin hanya dapat diakses oleh user dengan role 'admin':
 
 ### 7. Tidak Menyimpan Password Plaintext
 
-✅ **Implementasi:**
+**Implementasi:**
 - Password selalu di-hash dengan bcrypt sebelum disimpan
 - Model User menggunakan cast `'password' => 'hashed'`
 - Password tidak pernah ditampilkan atau di-return dalam response
 - Password di hidden attributes
 
 **Verifikasi:**
-- ✅ Password selalu di-hash dengan bcrypt sebelum save
-- ✅ Password tidak pernah di-return dalam JSON/response
-- ✅ Password tidak ada di logs atau error messages
+- Password selalu di-hash dengan bcrypt sebelum save
+- Password tidak pernah di-return dalam JSON/response
+- Password tidak ada di logs atau error messages
 
 **Lokasi:**
 - `app/Models/User.php`:
@@ -263,7 +263,7 @@ Fitur admin hanya dapat diakses oleh user dengan role 'admin':
 
 ### 8. Session Harus Secure
 
-✅ **Implementasi:**
+**Implementasi:**
 - Session driver: database (lebih secure dari file)
 - HTTP-only cookies: `true` (prevent XSS)
 - Same-Site cookies: `'lax'` (CSRF protection)
@@ -289,7 +289,7 @@ Fitur admin hanya dapat diakses oleh user dengan role 'admin':
 
 ### 9. Security Headers
 
-✅ **Implementasi:**
+**Implementasi:**
 - Content Security Policy (CSP) header untuk mencegah XSS
 - X-Frame-Options: DENY (mencegah clickjacking)
 - X-Content-Type-Options: nosniff (mencegah MIME type sniffing)
@@ -301,9 +301,9 @@ Fitur admin hanya dapat diakses oleh user dengan role 'admin':
 
 ### 10. Rate Limiting & IP Blocking
 
-✅ **Implementasi:**
-- Login rate limiting: Max 5 attempts per IP per minute
-- IP-based blocking: Automatic lockout setelah 5 failed attempts
+**Implementasi:**
+- Login rate limiting: Max 3 attempts per IP per minute
+- IP-based blocking: Automatic lockout setelah 3 failed attempts
 - Database tracking: Semua login attempts dicatat dengan IP address
 - Lockout duration: 15 menit
 - Remaining attempts warning: User diperingatkan tentang sisa percobaan
@@ -314,7 +314,7 @@ Fitur admin hanya dapat diakses oleh user dengan role 'admin':
 
 ### 11. Audit Logging
 
-✅ **Implementasi:**
+**Implementasi:**
 - Comprehensive audit trail: Semua event keamanan dicatat ke database
 - Authentication logging: Login, logout, registration, failed attempts
 - Authorization violations: Unauthorized access attempts dicatat
@@ -328,7 +328,7 @@ Fitur admin hanya dapat diakses oleh user dengan role 'admin':
 
 ---
 
-## 📦 Installation & Setup
+## Installation & Setup
 
 ### Prerequisites
 
@@ -424,7 +424,7 @@ Ikuti instruksi di command untuk memasukkan email, nama, dan password admin.
 
 ---
 
-## 🛠 Technology Stack
+## Technology Stack
 
 - **Framework**: Laravel 12.x
 - **PHP**: PHP 8.2+
@@ -434,7 +434,7 @@ Ikuti instruksi di command untuk memasukkan email, nama, dan password admin.
 
 ---
 
-## 📖 Usage Guide
+## Usage Guide
 
 ### User Registration
 
@@ -479,51 +479,13 @@ Ikuti instruksi di command untuk memasukkan email, nama, dan password admin.
 
 ---
 
-## 🧪 Testing
-
-To run tests:
-
-```bash
-php artisan test
-```
-
----
-
-## 🔧 Troubleshooting
-
-### Database Connection Error
-
-- Check `.env` file database credentials
-- Ensure database exists
-- Run `php artisan migrate`
-
-### File Upload Not Working
-
-- Check `storage/app/private` directory permissions
-- Ensure directory exists: `storage/app/private/uploads`
-- Check PHP `upload_max_filesize` and `post_max_size` settings
-
-### Session Not Working
-
-- Ensure database migrations are run
-- Check `SESSION_DRIVER` in `.env` (should be 'database')
-- Clear cache: `php artisan config:clear`
-
----
-
-## 📝 License
-
-This project is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
-
----
-
-## 👥 Authors
+## Authors
 
 Group of 3 students - AmanSpace Project
 
 ---
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - Laravel Framework
 - Tailwind CSS
