@@ -76,7 +76,7 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $ipAddress = $request->ip();
-        $maxAttempts = 5; // Maximum failed attempts
+        $maxAttempts = 3; // Maximum failed attempts
         $lockoutMinutes = 15; // Lockout duration in minutes
 
         // Check if IP is blocked due to too many failed attempts

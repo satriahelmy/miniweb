@@ -17,8 +17,8 @@ Route::middleware('guest')->group(function () {
     Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:5,1'); // Max 5 requests per minute
     
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-    // Rate limiting: Max 5 login attempts per IP per minute
-    Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
+    // Rate limiting: Max 3 login attempts per IP per minute
+    Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:3,1');
 });
 
 // Protected routes (require authentication)
