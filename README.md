@@ -1,112 +1,351 @@
 # AmanSpace
 
-A secure web application built with Laravel framework that implements essential security features including user authentication, data submission, and secure file management.
+AmanSpace adalah aplikasi web yang aman untuk mengelola data dan file pribadi. Dibangun dengan Laravel framework yang mengimplementasikan berbagai fitur keamanan esensial termasuk autentikasi pengguna, pengiriman data, dan manajemen file yang aman.
 
-## Features
+## 📋 Daftar Isi
 
-### 1. User Management
-- **User Registration**: Secure user registration with email validation
-- **User Login**: Authentication with password verification
-- **Password Hashing**: Passwords are hashed using bcrypt (Laravel's default)
-- **Session Handling**: Secure session management with database storage
+- [Cara Menjalankan Aplikasi](#cara-menjalankan-aplikasi)
+- [Penjelasan Fitur](#penjelasan-fitur)
+- [Aspek Keamanan yang Diterapkan](#aspek-keamanan-yang-diterapkan)
+- [Installation & Setup](#installation--setup)
+- [Technology Stack](#technology-stack)
+
+---
+
+## 🚀 Cara Menjalankan Aplikasi
+
+### Mode Development
+
+1. **Jalankan Laravel development server:**
+   ```bash
+   php artisan serve
+   ```
+
+2. **Di terminal lain, jalankan Vite dev server (untuk hot reload):**
+   ```bash
+   npm run dev
+   ```
+
+3. **Akses aplikasi di browser:**
+   ```
+   http://localhost:8000
+   ```
+
+### Mode Production
+
+1. **Build assets:**
+   ```bash
+   npm run build
+   ```
+
+2. **Optimasi Laravel:**
+   ```bash
+   php artisan config:cache
+   php artisan route:cache
+   php artisan view:cache
+   ```
+
+3. **Konfigurasi web server (Apache/Nginx)** untuk mengarah ke direktori `public`
+
+### Membuat Admin User
+
+Untuk membuat user admin, gunakan command berikut:
+
+```bash
+php artisan user:make-admin
+```
+
+Command ini akan meminta:
+- Email admin
+- Nama admin
+- Password admin
+
+Atau untuk mempromote user yang sudah ada menjadi admin:
+
+```bash
+php artisan user:make-admin user@example.com
+```
+
+---
+
+## ✨ Penjelasan Fitur
+
+### 1. Manajemen User
+
+#### Registrasi & Login
+- **Registrasi User**: Form registrasi dengan validasi email dan password yang kuat
+- **Login**: Autentikasi dengan verifikasi password menggunakan bcrypt
+- **Session Management**: Manajemen session yang aman dengan penyimpanan di database
+- **Rate Limiting**: Pembatasan percobaan login (maksimal 5 kali per IP per menit)
+- **IP Blocking**: Blokir otomatis setelah 5 percobaan login gagal selama 15 menit
+
+#### Role & Status User
+- **Role Management**: Sistem role dengan 2 level (user dan admin)
+- **User Status**: Fitur untuk mengaktifkan/nonaktifkan akun user
+- **Default Role**: User baru otomatis mendapat role 'user' dan status aktif
 
 ### 2. Data Submission
-- **Text Submission Form**: Users can create submissions with title and content
-- **Input Validation**: All inputs are validated and sanitized
-- **Content Management**: View, create, and delete submissions
-- **Access Control**: Users can only access their own submissions
 
-### 3. File Management
-- **File Upload**: Secure file upload with validation and sanitization
-- **File Download**: Download files with proper access control
-- **File Sanitization**: 
-  - Filename sanitization (removes dangerous characters)
-  - MIME type validation
-  - File size limits (10 MB maximum)
-  - Secure storage in private directory
-- **Access Control**: Users can only download their own files
+- **Buat Submission**: Form untuk membuat submission dengan judul (opsional) dan konten
+- **Lihat Submission**: Daftar semua submission milik user
+- **Hapus Submission**: User dapat menghapus submission miliknya sendiri
+- **Access Control**: User hanya dapat melihat dan mengelola submission miliknya sendiri
+- **Input Validation**: Semua input divalidasi dan disanitasi (HTML tags dihapus)
 
-## Security Features
+### 3. Manajemen File
 
-### Password Security
-- ✅ **Password Hashing**: Using bcrypt (via Laravel's Hash facade)
-- ✅ **No Plaintext Storage**: Passwords are never stored in plaintext
-- ✅ **Password Requirements**: Enforced through Laravel's Password validation rules
+- **Upload File**: Upload file dengan validasi dan sanitasi
+  - Tipe file yang diizinkan: JPEG, PNG, GIF, WebP, PDF, TXT, DOC, DOCX
+  - Ukuran maksimal: 10 MB
+  - Validasi MIME type untuk keamanan
+  - Sanitasi nama file (menghapus karakter berbahaya)
+  - Penyimpanan dengan nama unik (random) untuk mencegah konflik dan path traversal
+  
+- **Download File**: Download file dengan kontrol akses
+  - Hanya pemilik file yang dapat mengunduh
+  - Redirect dengan pesan error jika mencoba mengakses file orang lain
+  
+- **Daftar File**: Tampilkan semua file yang diupload oleh user
+- **Hapus File**: User dapat menghapus file miliknya sendiri
 
-### CSRF Protection
-- ✅ **CSRF Tokens**: All forms include CSRF tokens
-- ✅ **Automatic Protection**: Laravel middleware automatically validates CSRF tokens
-- ✅ **Same-Site Cookies**: Configured to prevent CSRF attacks
+### 4. Admin Panel
 
-### Input Validation
-- ✅ **Server-Side Validation**: All inputs validated on the server
-- ✅ **Input Sanitization**: HTML tags stripped from text inputs
-- ✅ **Type Checking**: File types validated using MIME type checking
-- ✅ **Size Limits**: File size and content length limits enforced
+Fitur admin hanya dapat diakses oleh user dengan role 'admin':
 
-### File Upload Security
-- ✅ **MIME Type Validation**: Only allowed file types accepted
-- ✅ **Filename Sanitization**: Dangerous characters removed from filenames
-- ✅ **Unique Storage Names**: Files stored with random unique names
-- ✅ **Private Storage**: Files stored in private directory (not publicly accessible)
-- ✅ **Path Traversal Prevention**: Secure file paths prevent directory traversal attacks
+- **Daftar User**: Melihat semua user yang terdaftar di sistem
+  - Informasi: ID, Nama, Email, Role, Status, Tanggal Registrasi
+  - Pagination untuk kemudahan navigasi
+  
+- **Nonaktifkan User**: Admin dapat menonaktifkan akun user
+  - User yang dinonaktifkan tidak dapat login
+  - Admin tidak dapat menonaktifkan akun sendiri atau admin lain
+  
+- **Hapus User**: Admin dapat menghapus user dari sistem
+  - Semua data terkait (file, submission) akan ikut terhapus (cascade)
+  - Admin tidak dapat menghapus akun sendiri atau admin lain
+  
+- **Proteksi Admin**: 
+  - Admin tidak dapat menghapus/menonaktifkan akun sendiri
+  - Admin tidak dapat menghapus/menonaktifkan admin lain
+  - Semua aksi admin dicatat dalam audit log
 
-### Access Control
-- ✅ **Authorization Checks**: Users can only access their own resources
-- ✅ **File Download Protection**: Files can only be downloaded by their owner
-- ✅ **Submission Access Control**: Users can only view/edit their own submissions
+---
 
-### Session Security
-- ✅ **Secure Sessions**: Sessions stored in database
-- ✅ **HTTP Only Cookies**: Session cookies marked as HTTP-only
-- ✅ **Session Regeneration**: Session ID regenerated on login
-- ✅ **Session Timeout**: Configurable session lifetime
+## 🔒 Aspek Keamanan yang Diterapkan
 
-### Rate Limiting & IP Blocking
-- ✅ **Login Rate Limiting**: Max 5 attempts per IP per minute (throttle middleware)
-- ✅ **IP-based Blocking**: Automatic lockout after 5 failed login attempts
-- ✅ **Database Tracking**: All login attempts logged with IP address and timestamp
-- ✅ **Lockout Duration**: 15 minutes lockout after exceeding max attempts
-- ✅ **Remaining Attempts Warning**: Users warned about remaining attempts
+### 1. Password Hashing (bcrypt/argon2)
 
-### Audit Logging & Security Logging
-- ✅ **Comprehensive Audit Trail**: All security-related events logged to database
-- ✅ **Authentication Logging**: Login, logout, registration, failed attempts
-- ✅ **Authorization Violations**: Unauthorized access attempts logged
-- ✅ **File Operations**: Upload, download, delete operations tracked
-- ✅ **Data Modifications**: Submission create/delete tracked
-- ✅ **Dual Logging**: Database + Laravel log file for critical events
-- ✅ **IP & User Agent Tracking**: Complete context for each action
-- ✅ **Metadata Storage**: Additional data stored as JSON for detailed analysis
+✅ **Implementasi:**
+- Menggunakan `Hash::make()` dengan bcrypt (default Laravel)
+- Model User menggunakan cast `'password' => 'hashed'` (auto-hash saat assign)
+- Password tidak pernah disimpan dalam plaintext
+- Password requirements: minimal 8 karakter, harus ada huruf besar, huruf kecil, angka, dan simbol
 
-### No Hardcoded Secrets
-- ✅ **Environment Variables**: All secrets stored in `.env` file
-- ✅ **Application Key**: Generated via `php artisan key:generate`
-- ✅ **Database Credentials**: Stored in environment variables
+**Lokasi:** 
+- `app/Http/Controllers/AuthController.php` (line 51)
+- `app/Models/User.php` (line 46)
 
-## Technology Stack
+### 2. CSRF Protection
 
-- **Framework**: Laravel 12.x
-- **PHP**: PHP 8.2+
-- **Database**: MySQL/PostgreSQL/SQLite (configurable)
-- **Frontend**: Tailwind CSS 4.0
-- **Build Tool**: Vite
+✅ **Implementasi:**
+- Semua form menggunakan `@csrf` directive
+- CSRF token di meta tag untuk AJAX requests
+- Laravel middleware otomatis memvalidasi CSRF token
+- Same-Site cookie attribute set ke 'lax' untuk CSRF protection
 
-## Installation & Setup
+**Lokasi:**
+- Semua form di `resources/views/**/*.blade.php` menggunakan `@csrf`
+- `resources/views/layouts/app.blade.php` (line 6)
+- `config/session.php` (line 202)
+
+### 3. Input Validation
+
+✅ **Implementasi:**
+- Server-side validation menggunakan Laravel Validator
+- Validasi untuk semua input (email, password, file, content)
+- Input sanitization menggunakan `strip_tags()` untuk text inputs
+- File type validation (MIME type checking)
+- File size validation (max 10MB)
+
+**Validasi yang diterapkan:**
+- Email: format email, unique, max 255
+- Password: required, confirmed, minimal 8 karakter dengan kompleksitas tinggi
+- Submission: title (nullable, max 255), content (required, max 10000)
+- File: required, file type, max size (10MB), MIME type whitelist
+
+**Lokasi:**
+- `app/Http/Controllers/AuthController.php`
+- `app/Http/Controllers/SubmissionController.php`
+- `app/Http/Controllers/FileController.php`
+
+### 4. File Upload Sanitization
+
+✅ **Implementasi:**
+- MIME type validation (whitelist approach)
+- Filename sanitization (remove dangerous characters)
+- Unique stored filename (prevent conflicts & path traversal)
+- File size limit (10MB)
+- Storage di private directory (tidak publicly accessible)
+- Extension validation
+
+**Sanitization yang diterapkan:**
+1. MIME type check: Hanya file dengan MIME type yang diizinkan
+2. Filename sanitization: `preg_replace('/[^a-zA-Z0-9._-]/', '_', $originalName)`
+3. Unique stored name: `Str::random(40) . '.' . $extension`
+4. Private storage: `storage/app/private/uploads/{user_id}/`
+5. DoS Protection: Validasi ukuran file eksplisit dalam bytes sebelum pemrosesan
+
+**Lokasi:**
+- `app/Http/Controllers/FileController.php`:
+  - Line 15-24: Allowed MIME types whitelist
+  - Line 27: Max file size constant
+  - Line 75-85: File size validation & MIME type validation
+  - Line 95-99: Filename sanitization & unique name generation
+  - Line 111: Private storage
+
+### 5. Access Control untuk Download
+
+✅ **Implementasi:**
+- Authorization check di controller method
+- Query filtering (hanya menampilkan file milik user)
+- Redirect dengan pesan error yang user-friendly (bukan 403 page)
+- 403 Forbidden response untuk unauthorized access di middleware admin
+
+**Protection Layers:**
+1. Query filtering: Hanya file milik user yang ditampilkan di list (`where('user_id', Auth::id())`)
+2. Controller check: Verifikasi ownership sebelum download
+3. User-friendly error: Redirect ke halaman sendiri dengan pesan error, bukan 403 page
+
+**Lokasi:**
+- `app/Http/Controllers/FileController.php`:
+  - Line 37: Query filter `where('user_id', Auth::id())`
+  - Line 136-142: Authorization check di download()
+  - Line 155-161: Authorization check di destroy()
+
+### 6. Tidak Ada Hardcoded Secrets
+
+✅ **Implementasi:**
+- Semua secrets menggunakan environment variables (.env)
+- APP_KEY di-generate via `php artisan key:generate`
+- Database credentials di .env
+- Tidak ada password/secret hardcoded di source code
+
+**Verifikasi:**
+- ✅ `.env` file di .gitignore (tidak di-commit)
+- ✅ `.env.example` sebagai template
+- ✅ Semua config menggunakan `env()` helper
+- ✅ Tidak ada hardcoded credentials di code
+
+**Lokasi:**
+- `config/app.php`: `env('APP_KEY')`
+- `config/database.php`: `env('DB_*')`
+- `config/session.php`: `env('SESSION_*')`
+
+### 7. Tidak Menyimpan Password Plaintext
+
+✅ **Implementasi:**
+- Password selalu di-hash dengan bcrypt sebelum disimpan
+- Model User menggunakan cast `'password' => 'hashed'`
+- Password tidak pernah ditampilkan atau di-return dalam response
+- Password di hidden attributes
+
+**Verifikasi:**
+- ✅ Password selalu di-hash dengan bcrypt sebelum save
+- ✅ Password tidak pernah di-return dalam JSON/response
+- ✅ Password tidak ada di logs atau error messages
+
+**Lokasi:**
+- `app/Models/User.php`:
+  - Line 32-34: `protected $hidden = ['password', ...]`
+  - Line 46: `'password' => 'hashed'` (auto-hash)
+- `app/Http/Controllers/AuthController.php`:
+  - Line 51: `Hash::make($request->password)` (explicit hash)
+
+### 8. Session Harus Secure
+
+✅ **Implementasi:**
+- Session driver: database (lebih secure dari file)
+- HTTP-only cookies: `true` (prevent XSS)
+- Same-Site cookies: `'lax'` (CSRF protection)
+- Session encryption: Configurable via env
+- Session regeneration: On login
+- Secure cookie: Configurable via env (untuk HTTPS)
+
+**Security Features:**
+1. Database storage: Session disimpan di database (lebih secure)
+2. HTTP-only: JavaScript tidak bisa akses session cookie
+3. Same-Site: Mencegah CSRF attacks
+4. Regeneration: Session ID di-regenerate saat login
+5. Encryption: Optional session encryption
+
+**Lokasi:**
+- `config/session.php`:
+  - Line 21: `'driver' => env('SESSION_DRIVER', 'database')`
+  - Line 185: `'http_only' => env('SESSION_HTTP_ONLY', true)`
+  - Line 202: `'same_site' => env('SESSION_SAME_SITE', 'lax')`
+  - Line 50: `'encrypt' => env('SESSION_ENCRYPT', false)`
+- `app/Http/Controllers/AuthController.php`:
+  - Line 109: `$request->session()->regenerate()` (on login)
+
+### 9. Security Headers
+
+✅ **Implementasi:**
+- Content Security Policy (CSP) header untuk mencegah XSS
+- X-Frame-Options: DENY (mencegah clickjacking)
+- X-Content-Type-Options: nosniff (mencegah MIME type sniffing)
+- X-Powered-By header dihilangkan (mencegah information disclosure)
+- Referrer-Policy dan Permissions-Policy
+
+**Lokasi:**
+- `app/Http/Middleware/SecurityHeaders.php`
+
+### 10. Rate Limiting & IP Blocking
+
+✅ **Implementasi:**
+- Login rate limiting: Max 5 attempts per IP per minute
+- IP-based blocking: Automatic lockout setelah 5 failed attempts
+- Database tracking: Semua login attempts dicatat dengan IP address
+- Lockout duration: 15 menit
+- Remaining attempts warning: User diperingatkan tentang sisa percobaan
+
+**Lokasi:**
+- `app/Http/Controllers/AuthController.php` (line 78-92)
+- `app/Models/LoginAttempt.php`
+
+### 11. Audit Logging
+
+✅ **Implementasi:**
+- Comprehensive audit trail: Semua event keamanan dicatat ke database
+- Authentication logging: Login, logout, registration, failed attempts
+- Authorization violations: Unauthorized access attempts dicatat
+- File operations: Upload, download, delete operations tracked
+- Data modifications: Submission create/delete tracked
+- IP & User Agent tracking: Context lengkap untuk setiap aksi
+
+**Lokasi:**
+- `app/Services/AuditLogService.php`
+- `app/Models/AuditLog.php`
+
+---
+
+## 📦 Installation & Setup
 
 ### Prerequisites
+
 - PHP 8.2 or higher
 - Composer
 - Node.js and npm
 - Database (MySQL, PostgreSQL, or SQLite)
 
 ### Step 1: Clone the Repository
+
 ```bash
 git clone <repository-url>
 cd miniweb
 ```
 
 ### Step 2: Install Dependencies
+
 ```bash
 # Install PHP dependencies
 composer install
@@ -116,6 +355,7 @@ npm install
 ```
 
 ### Step 3: Environment Configuration
+
 ```bash
 # Copy environment file
 cp .env.example .env
@@ -125,7 +365,9 @@ php artisan key:generate
 ```
 
 ### Step 4: Configure Database
+
 Edit `.env` file and set your database credentials:
+
 ```env
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
@@ -136,11 +378,13 @@ DB_PASSWORD=your_password
 ```
 
 ### Step 5: Run Migrations
+
 ```bash
 php artisan migrate
 ```
 
 ### Step 6: Build Frontend Assets
+
 ```bash
 # For development
 npm run dev
@@ -149,7 +393,8 @@ npm run dev
 npm run build
 ```
 
-### Step 7: Seed Default Users (Development Only)
+### Step 7: Seed Test User (Development Only)
+
 ```bash
 php artisan db:seed --class=UserSeeder
 ```
@@ -157,151 +402,63 @@ php artisan db:seed --class=UserSeeder
 > **⚠️ SECURITY WARNING**: Default users are **ONLY** created in development/testing environments. 
 > They will **NOT** be created in production for security reasons.
 
-This will create two default users for testing (only in local/development environment):
-- **Admin User**: 
-  - Email: `admin@example.com`
-  - Password: `password123`
+Ini akan membuat 1 test user untuk testing (hanya di environment local/development):
 - **Test User**: 
   - Email: `test@example.com`
   - Password: `password123`
 
-**For Production**: 
-- Default users are automatically skipped
-- Create admin accounts manually through registration or database
-- Use strong, unique passwords
+**Untuk Production**: 
+- Default users otomatis di-skip
+- Buat admin account menggunakan command: `php artisan user:make-admin`
+- Gunakan password yang kuat dan unik
 
-### Step 8: Start Development Server
-```bash
-php artisan serve
-```
+### Step 8: Create Admin User
 
-The application will be available at `http://localhost:8000`
-
-## How to Run the Application
-
-### Development Mode
-1. Start Laravel development server:
-   ```bash
-   php artisan serve
-   ```
-
-2. In another terminal, start Vite dev server (for hot reload):
-   ```bash
-   npm run dev
-   ```
-
-3. Access the application at `http://localhost:8000`
-
-### Production Mode
-1. Build assets:
-   ```bash
-   npm run build
-   ```
-
-2. Optimize Laravel:
-   ```bash
-   php artisan config:cache
-   php artisan route:cache
-   php artisan view:cache
-   ```
-
-3. Configure your web server (Apache/Nginx) to point to the `public` directory
-
-## Project Structure
-
-```
-miniweb/
-├── app/
-│   ├── Http/
-│   │   └── Controllers/
-│   │       ├── AuthController.php      # Authentication (register/login/logout)
-│   │       ├── SubmissionController.php # Submission management
-│   │       └── FileController.php       # File upload/download
-│   └── Models/
-│       ├── User.php                     # User model
-│       ├── Submission.php               # Submission model
-│       └── File.php                     # File model
-├── database/
-│   └── migrations/
-│       ├── create_users_table.php
-│       ├── create_submissions_table.php
-│       └── create_files_table.php
-├── resources/
-│   └── views/
-│       ├── layouts/
-│       │   └── app.blade.php           # Main layout
-│       ├── auth/
-│       │   ├── login.blade.php          # Login page
-│       │   └── register.blade.php       # Registration page
-│       ├── submissions/
-│       │   ├── index.blade.php          # List submissions
-│       │   ├── create.blade.php          # Create submission
-│       │   └── show.blade.php            # View submission
-│       ├── files/
-│       │   ├── index.blade.php          # List files
-│       │   └── create.blade.php         # Upload file
-│       └── dashboard.blade.php           # Dashboard
-├── routes/
-│   └── web.php                          # Application routes
-└── storage/
-    └── app/
-        └── private/                     # Private file storage
-```
-
-## Default Users (Development Only)
-
-After running the seeder in **development/testing** environment, you can login with this default account:
-
-1. **Test Account**
-   - Email: `test@example.com`
-   - Password: `password123`
-
-### ⚠️ Security Best Practices
-
-**For Development/Testing:**
-- Default users are automatically created only in `local`, `testing`, or `development` environments
-- Safe to use for testing purposes
-
-**For Production:**
-- ✅ Default users are **NOT** created automatically in production
-- ✅ Create admin accounts manually through registration
-- ✅ Use strong, unique passwords
-- ✅ Remove any default users if they exist: `php artisan users:remove-default`
-
-### Remove Default Users
-
-To remove default users for security (e.g., before deploying to production):
+Untuk membuat admin user pertama kali:
 
 ```bash
-php artisan users:remove-default
+php artisan user:make-admin
 ```
 
-Or with force flag (no confirmation):
-```bash
-php artisan users:remove-default --force
-```
+Ikuti instruksi di command untuk memasukkan email, nama, dan password admin.
 
-## Usage Guide
+---
+
+## 🛠 Technology Stack
+
+- **Framework**: Laravel 12.x
+- **PHP**: PHP 8.2+
+- **Database**: MySQL/PostgreSQL/SQLite (configurable)
+- **Frontend**: Tailwind CSS 4.0
+- **Build Tool**: Vite
+
+---
+
+## 📖 Usage Guide
 
 ### User Registration
+
 1. Navigate to `/register`
 2. Fill in name, email, and password
 3. Click "Register"
 4. You will be automatically logged in
 
 ### User Login
+
 1. Navigate to `/login`
 2. Enter your email and password
 3. Click "Login"
 4. You will be redirected to the dashboard
 
 ### Creating a Submission
+
 1. After logging in, go to Dashboard
 2. Click "Create New" under Submissions
 3. Enter title (optional) and content
 4. Click "Create Submission"
 
 ### Uploading a File
+
 1. Go to Dashboard
 2. Click "Upload File" under Files
 3. Select a file (allowed types: JPEG, PNG, GIF, WebP, PDF, TXT, DOC, DOCX)
@@ -309,73 +466,64 @@ php artisan users:remove-default --force
 5. Click "Upload File"
 
 ### Downloading a File
+
 1. Go to "My Files" page
 2. Click "Download" next to the file you want
 3. Only files you uploaded can be downloaded
 
-## Security Implementation Details
+### Admin Panel
 
-### Password Hashing
-- Laravel uses bcrypt by default via `Hash::make()`
-- Passwords are automatically hashed when creating users
-- Password verification uses `Hash::check()`
+1. Login sebagai admin
+2. Klik "Admin Panel" di navbar atau card di dashboard
+3. Kelola user: lihat daftar, disable/enable, atau hapus user
 
-### CSRF Protection
-- All POST/PUT/PATCH/DELETE requests require CSRF token
-- Tokens are automatically included in Blade forms via `@csrf`
-- Laravel middleware validates tokens automatically
+---
 
-### Input Validation
-- Validation rules defined in controllers
-- Failed validation returns error messages
-- Input sanitization using `strip_tags()` for text inputs
-
-### File Upload Security
-- MIME type validation against whitelist
-- Filename sanitization using regex
-- Files stored with random unique names
-- Storage in private directory (not web-accessible)
-- Access control checks ownership before download
-
-### Session Security
-- Sessions stored in database
-- HTTP-only cookies prevent JavaScript access
-- Session ID regeneration on login
-- Configurable session lifetime
-
-## Testing
+## 🧪 Testing
 
 To run tests:
+
 ```bash
 php artisan test
 ```
 
-## Troubleshooting
+---
+
+## 🔧 Troubleshooting
 
 ### Database Connection Error
+
 - Check `.env` file database credentials
 - Ensure database exists
 - Run `php artisan migrate`
 
 ### File Upload Not Working
+
 - Check `storage/app/private` directory permissions
 - Ensure directory exists: `storage/app/private/uploads`
 - Check PHP `upload_max_filesize` and `post_max_size` settings
 
 ### Session Not Working
+
 - Ensure database migrations are run
 - Check `SESSION_DRIVER` in `.env` (should be 'database')
 - Clear cache: `php artisan config:clear`
 
-## License
+---
+
+## 📝 License
 
 This project is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
 
-## Authors
+---
 
-Group of 3 students - Mini Secure Web Application Project
+## 👥 Authors
 
-## Acknowledgments
+Group of 3 students - AmanSpace Project
+
+---
+
+## 🙏 Acknowledgments
 
 - Laravel Framework
 - Tailwind CSS
