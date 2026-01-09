@@ -14,20 +14,13 @@ use Illuminate\Validation\Rules\Password;
 
 class AuthController extends Controller
 {
-    /**
-     * Show registration form
-     */
     public function showRegister()
     {
         return view('auth.register');
     }
 
-    /**
-     * Handle registration
-     */
     public function register(Request $request)
     {
-        // Input validation
         $validator = Validator::make($request->all(), [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
@@ -35,9 +28,9 @@ class AuthController extends Controller
                 'required',
                 'confirmed',
                 Password::min(8)
-                    ->mixedCase()      // Harus ada huruf besar dan kecil
-                    ->numbers()        // Harus ada angka
-                    ->symbols(),       // Harus ada karakter khusus
+                    ->mixedCase()
+                    ->numbers()
+                    ->symbols(),
             ],
         ]);
 
@@ -45,46 +38,33 @@ class AuthController extends Controller
             return back()->withErrors($validator)->withInput();
         }
 
-        // Create user with hashed password (Laravel automatically hashes using bcrypt)
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => Hash::make($request->password), // Password hashing dengan bcrypt
-            'role' => 'user', // Default role for new users
-            'is_active' => true, // New users are active by default
+            'password' => Hash::make($request->password),
+            'role' => 'user',
+            'is_active' => true,
         ]);
 
-        // Auto login after registration
         Auth::login($user);
-
-        // Log registration
         AuditLogService::logAuth('register', 'success', $user->email);
 
         return redirect()->route('dashboard')->with('success', 'Registration successful!');
     }
 
-    /**
-     * Show login form
-     */
     public function showLogin()
     {
         return view('auth.login');
     }
 
-    /**
-     * Handle login with rate limiting and IP blocking
-     */
     public function login(Request $request)
     {
         $ipAddress = $request->ip();
-        $maxAttempts = 3; // Maximum failed attempts
-        $lockoutMinutes = 15; // Lockout duration in minutes
-
-        // Check if IP is blocked due to too many failed attempts
+        $maxAttempts = 3;
+        $lockoutMinutes = 15;
         if (LoginAttempt::isBlocked($ipAddress, $maxAttempts, $lockoutMinutes)) {
             $remainingTime = LoginAttempt::getRemainingLockoutTime($ipAddress, $lockoutMinutes);
             
-            // Log blocked login attempt
             AuditLogService::logAuth('login', 'blocked', $credentials['email'] ?? null, "IP blocked: {$ipAddress}");
             
             return back()->withErrors([
@@ -92,13 +72,11 @@ class AuthController extends Controller
             ])->onlyInput('email');
         }
 
-        // Input validation
         $credentials = $request->validate([
             'email' => ['required', 'email'],
             'password' => ['required'],
         ]);
 
-        // Check if user exists and is active
         $user = User::where('email', $credentials['email'])->first();
         
         if ($user && !$user->is_active) {
@@ -110,32 +88,18 @@ class AuthController extends Controller
             ])->onlyInput('email');
         }
 
-        // Attempt login with secure session
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
-            // Record successful login attempt
             LoginAttempt::record($ipAddress, $credentials['email'], true);
-            
-            // Clear failed attempts for this IP
             LoginAttempt::clearFailedAttempts($ipAddress);
-            
-            // Log successful login
             AuditLogService::logAuth('login', 'success', $credentials['email']);
-            
             $request->session()->regenerate();
 
-            // Safe redirect: only allow internal URLs
             $intendedUrl = RedirectHelper::safeIntended($request, 'dashboard');
-            
             return redirect($intendedUrl)->with('success', 'Login successful!');
         }
 
-        // Record failed login attempt
         LoginAttempt::record($ipAddress, $credentials['email'], false);
-        
-        // Log failed login
         AuditLogService::logAuth('login', 'failed', $credentials['email'], 'Invalid credentials');
-
-        // Check remaining attempts
         $failedAttempts = LoginAttempt::where('ip_address', $ipAddress)
             ->where('attempted_at', '>=', now()->subMinutes($lockoutMinutes))
             ->where('success', false)
@@ -153,14 +117,9 @@ class AuthController extends Controller
         ])->onlyInput('email');
     }
 
-    /**
-     * Handle logout
-     */
     public function logout(Request $request)
     {
-        // Log logout before logging out
         AuditLogService::logAuth('logout', 'success', Auth::user()?->email);
-        
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();

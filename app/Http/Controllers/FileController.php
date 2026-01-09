@@ -27,11 +27,7 @@ class FileController extends Controller
     // Maximum file size: 10MB
     private const MAX_FILE_SIZE = 10240; // KB
 
-    // Note: Authentication middleware is applied in routes/web.php
 
-    /**
-     * Display all files for the authenticated user
-     */
     public function index()
     {
         $files = File::where('user_id', Auth::id())
@@ -41,20 +37,13 @@ class FileController extends Controller
         return view('files.index', compact('files'));
     }
 
-    /**
-     * Show the form for uploading a file
-     */
     public function create()
     {
         return view('files.create');
     }
 
-    /**
-     * Store uploaded file with sanitization
-     */
     public function store(Request $request)
     {
-        // Input validation
         $validator = Validator::make($request->all(), [
             'file' => [
                 'required',
@@ -68,12 +57,10 @@ class FileController extends Controller
         $validationErrors = [];
         $mimeType = null;
 
-        // Collect all validation errors
         if ($validator->fails()) {
             $validationErrors = array_merge($validationErrors, $validator->errors()->all());
         }
 
-        // DoS Protection: Explicit file size validation in bytes
         if ($uploadedFile) {
             $maxSizeInBytes = self::MAX_FILE_SIZE * 1024;
             $fileSize = $uploadedFile->getSize();
@@ -82,35 +69,26 @@ class FileController extends Controller
                 $validationErrors[] = 'File size exceeds the maximum allowed size of ' . self::MAX_FILE_SIZE . ' KB.';
             }
 
-            // Additional DoS protection: Check if file is actually uploaded (not empty)
             if ($fileSize === 0 || $fileSize === false) {
                 $validationErrors[] = 'Invalid file or file is empty.';
             }
 
-            // File sanitization: validate MIME type
             $mimeType = $uploadedFile->getMimeType();
             if (!in_array($mimeType, self::ALLOWED_MIME_TYPES)) {
                 $validationErrors[] = 'File type not allowed.';
             }
         }
 
-        // Return early if there are validation errors
         if (!empty($validationErrors)) {
             return back()->withErrors(['file' => $validationErrors[0]])->withInput();
         }
 
-        // Sanitize filename: remove dangerous characters and create safe stored name
         $originalName = $uploadedFile->getClientOriginalName();
         $sanitizedOriginalName = preg_replace('/[^a-zA-Z0-9._-]/', '_', $originalName);
-        
-        // Generate unique stored name to prevent conflicts and path traversal
         $extension = $uploadedFile->getClientOriginalExtension();
         $storedName = Str::random(40) . '.' . $extension;
-
-        // Store file in private storage (not publicly accessible)
         $path = $uploadedFile->storeAs('uploads/' . Auth::id(), $storedName, 'private');
 
-        // Save file metadata to database
         $file = File::create([
             'user_id' => Auth::id(),
             'original_name' => $sanitizedOriginalName,
@@ -120,7 +98,6 @@ class FileController extends Controller
             'path' => $path,
         ]);
 
-        // Log file upload
         AuditLogService::logFile('upload', $file, 'success');
 
         return redirect()->route('files.index')
@@ -159,25 +136,15 @@ class FileController extends Controller
         );
     }
 
-    /**
-     * Remove the specified file
-     */
     public function destroy(File $file)
     {
-        // Access control: only owner can delete
         if ($file->user_id !== Auth::id()) {
-            // Log unauthorized delete attempt
             AuditLogService::logUnauthorized('file_delete', $file, "User attempted to delete file owned by user {$file->user_id}");
             abort(403, 'Unauthorized access.');
         }
 
-        // Log file deletion before deleting
         AuditLogService::logFile('delete', $file, 'success');
-
-        // Delete file from storage
         Storage::disk('private')->delete($file->path);
-
-        // Delete record from database
         $file->delete();
 
         return redirect()->route('files.index')

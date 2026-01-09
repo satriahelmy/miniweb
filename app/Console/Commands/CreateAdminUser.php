@@ -8,40 +8,23 @@ use Illuminate\Support\Facades\Hash;
 
 class CreateAdminUser extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
     protected $signature = 'user:make-admin 
                             {email? : Email of the admin user} 
                             {--name= : Name of the admin user}';
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
     protected $description = 'Create or promote a user account to admin role in a secure way';
-
-    /**
-     * Execute the console command.
-     */
     public function handle()
     {
         $this->info('=== Create / Promote Admin User ===');
 
-        // Get email (argument or interactive)
         $email = $this->argument('email') 
             ?? $this->ask('Enter admin email');
 
-        // Basic email validation
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $this->error('Invalid email format.');
             return Command::FAILURE;
         }
 
-        // Find existing user or create new
         $user = User::where('email', $email)->first();
 
         if ($user) {
@@ -60,10 +43,7 @@ class CreateAdminUser extends Command
             return Command::SUCCESS;
         }
 
-        // New admin user
         $name = $this->option('name') ?: $this->ask('Enter admin name');
-
-        // Ask for password (hidden input)
         $password = $this->secret('Enter admin password (will not be shown)');
         $passwordConfirm = $this->secret('Confirm admin password');
 
