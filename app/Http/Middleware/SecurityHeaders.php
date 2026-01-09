@@ -21,19 +21,17 @@ class SecurityHeaders
         $response->headers->remove('X-Powered-By');
 
         // Content Security Policy (CSP) - Prevent XSS attacks
-        // Note: 'unsafe-inline' is needed for Laravel's CSRF token meta tag and inline scripts
-        // For production, consider using nonce-based CSP for better security
         $csp = "default-src 'self'; " .
-               "script-src 'self' 'unsafe-inline'; " . // Allow inline scripts for Laravel (CSRF token, etc.)
-               "style-src 'self' 'unsafe-inline'; " . // Allow inline styles
-               "img-src 'self' data:; " . // Allow images from self and data URIs only (no wildcard)
-               "font-src 'self' data:; " . // Allow fonts from self and data URIs
-               "connect-src 'self'; " . // Allow AJAX/fetch to same origin
-               "frame-ancestors 'none'; " . // Prevent clickjacking (alternative to X-Frame-Options)
-               "base-uri 'self'; " . // Restrict base tag
-               "form-action 'self'; " . // Restrict form submissions
-               "object-src 'none'; " . // Disable plugins
-               "upgrade-insecure-requests"; // Upgrade HTTP to HTTPS
+               "script-src 'self' 'unsafe-inline'; " .
+               "style-src 'self' 'unsafe-inline'; " .
+               "img-src 'self' data:; " .
+               "font-src 'self' data:; " .
+               "connect-src 'self'; " .
+               "frame-ancestors 'none'; " .
+               "base-uri 'self'; " .
+               "form-action 'self'; " .
+               "object-src 'none'; " .
+               "upgrade-insecure-requests";
 
         $response->headers->set('Content-Security-Policy', $csp);
 

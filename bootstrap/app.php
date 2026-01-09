@@ -14,6 +14,9 @@ return Application::configure(basePath: dirname(__DIR__))
         // Add security headers middleware globally
         $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
         
+        // Production security checks
+        $middleware->append(\App\Http\Middleware\ProductionSecurity::class);
+        
         // Register admin middleware alias
         $middleware->alias([
             'admin' => \App\Http\Middleware\AdminMiddleware::class,

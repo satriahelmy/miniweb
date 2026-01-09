@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\RedirectHelper;
 use App\Models\LoginAttempt;
 use App\Models\User;
 use App\Services\AuditLogService;
@@ -120,9 +121,12 @@ class AuthController extends Controller
             // Log successful login
             AuditLogService::logAuth('login', 'success', $credentials['email']);
             
-            $request->session()->regenerate(); // Regenerate session ID for security
+            $request->session()->regenerate();
 
-            return redirect()->intended(route('dashboard'))->with('success', 'Login successful!');
+            // Safe redirect: only allow internal URLs
+            $intendedUrl = RedirectHelper::safeIntended($request, 'dashboard');
+            
+            return redirect($intendedUrl)->with('success', 'Login successful!');
         }
 
         // Record failed login attempt
