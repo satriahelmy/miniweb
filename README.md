@@ -482,6 +482,9 @@ Ikuti instruksi di command untuk memasukkan email, nama, dan password admin.
 ## Authors
 
 Group of 3 students - AmanSpace Project
+- Helmy Satria Martha Putra	23524018
+- Ibnu Prastowo Haryono Putro	23524030
+- Meldrin Tupamahu	23524031
 
 ---
 
